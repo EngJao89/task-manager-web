@@ -3,9 +3,9 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { trpc } from "@/lib/trpc/client"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,46 +19,46 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-const signInSchema = z.object({
+const signUpSchema = z.object({
+  name: z.string().min(2, { message: "Nome deve ter no mínimo 2 caracteres" }),
   email: z.string().email({ message: "Email inválido" }),
   password: z.string().min(6, { message: "A senha deve ter no mínimo 6 caracteres" }),
+  confirmPassword: z.string().min(6, { message: "Confirme sua senha" }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
 })
 
-type SignInFormData = z.infer<typeof signInSchema>
+type SignUpFormData = z.infer<typeof signUpSchema>
 
-export default function Home() {
+export default function SignUpPage() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInFormData>({
-    resolver: zodResolver(signInSchema),
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
   })
 
-  const onSubmit = async (data: SignInFormData) => {
-    setIsLoading(true)
+  const signUpMutation = trpc.auth.signUp.useMutation({
+    onSuccess: () => {
+      router.push("/")
+    },
+    onError: (error) => {
+      setError(error.message || "Erro ao criar conta")
+    },
+  })
+
+  const onSubmit = (data: SignUpFormData) => {
     setError(null)
-
-    try {
-      const result = await authClient.signIn.email({
-        email: data.email,
-        password: data.password,
-      })
-
-      if (result.error) {
-        setError(result.error.message || "Erro ao fazer login")
-      } else {
-        router.push("/")
-      }
-    } catch {
-      setError("Erro ao fazer login. Tente novamente.")
-    } finally {
-      setIsLoading(false)
-    }
+    signUpMutation.mutate({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    })
   }
 
   return (
@@ -68,9 +68,9 @@ export default function Home() {
       </h1>
       <Card className="w-full max-w-md border-zinc-700 bg-zinc-900">
         <CardHeader>
-          <CardTitle className="text-2xl text-zinc-100">Entrar</CardTitle>
+          <CardTitle className="text-2xl text-zinc-100">Criar Conta</CardTitle>
           <CardDescription className="text-zinc-400">
-            Digite suas credenciais para acessar sua conta
+            Preencha os dados para criar sua conta
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -80,6 +80,22 @@ export default function Home() {
                 {error}
               </div>
             )}
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-zinc-200">
+                Nome
+              </Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Seu nome"
+                className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500"
+                {...register("name")}
+                aria-invalid={errors.name ? "true" : "false"}
+              />
+              {errors.name && (
+                <p className="text-sm text-red-400">{errors.name.message}</p>
+              )}
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-zinc-200">
                 Email
@@ -112,31 +128,34 @@ export default function Home() {
                 <p className="text-sm text-red-400">{errors.password.message}</p>
               )}
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-zinc-200">
+                Confirmar Senha
+              </Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500"
+                {...register("confirmPassword")}
+                aria-invalid={errors.confirmPassword ? "true" : "false"}
+              />
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-400">{errors.confirmPassword.message}</p>
+              )}
+            </div>
           </CardContent>
           <CardFooter className="mt-4">
             <Button
               type="submit"
               className="w-full bg-zinc-700 text-zinc-100 hover:bg-zinc-600"
-              disabled={isLoading}
+              disabled={signUpMutation.isPending}
             >
-              {isLoading ? "Entrando..." : "Entrar"}
+              {signUpMutation.isPending ? "Criando conta..." : "Criar Conta"}
             </Button>
           </CardFooter>
         </form>
       </Card>
-      <div className="mt-6 text-center">
-        <p className="text-sm text-zinc-400 mb-3">
-          Não tem uma conta?
-        </p>
-        <Button
-          type="button"
-          variant="outline"
-          className="bg-transparent border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100"
-          onClick={() => router.push("/signup")}
-        >
-          Criar conta
-        </Button>
-      </div>
     </div>
   )
 }
