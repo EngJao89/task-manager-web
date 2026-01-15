@@ -40,7 +40,7 @@ export default function Home() {
 
   const signInMutation = trpc.auth.signIn.useMutation({
     onSuccess: () => {
-      router.push("/")
+      router.push("/dashboard")
     },
     onError: (error) => {
       setError(error.message || "Erro ao fazer login")

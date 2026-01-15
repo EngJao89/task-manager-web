@@ -1,9 +1,10 @@
 import { z } from "zod"
-import { router, publicProcedure } from "../init"
+import { router, publicProcedure, protectedProcedure } from "../init"
 import { users } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { nanoid } from "nanoid"
 import bcrypt from "bcryptjs"
+import { createSession } from "@/lib/session"
 
 const signUpSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -87,6 +88,10 @@ export const authRouter = router({
           throw new Error("Email ou senha incorretos")
         }
 
+        const token = await createSession(user[0].id)
+
+        await ctx.setCookie("session-token", token, { maxAge: 60 * 60 * 24 * 7 })
+
         return {
           success: true,
           user: {
@@ -103,4 +108,24 @@ export const authRouter = router({
         throw new Error("Erro desconhecido ao fazer login")
       }
     }),
+
+  getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
+    return {
+      user: ctx.session.user,
+    }
+  }),
+
+  signOut: protectedProcedure.mutation(async ({ ctx }) => {
+    const cookieStore = await import("next/headers").then((m) => m.cookies())
+    const token = cookieStore.get("session-token")?.value
+
+    if (token) {
+      const { deleteSession } = await import("@/lib/session")
+      await deleteSession(token)
+    }
+
+    await ctx.setCookie("session-token", "", { maxAge: 0 })
+
+    return { success: true }
+  }),
 })
