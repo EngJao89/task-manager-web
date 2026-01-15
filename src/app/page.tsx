@@ -3,9 +3,9 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { trpc } from "@/lib/trpc/client"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,7 +28,6 @@ type SignInFormData = z.infer<typeof signInSchema>
 
 export default function Home() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const {
@@ -39,26 +38,21 @@ export default function Home() {
     resolver: zodResolver(signInSchema),
   })
 
-  const onSubmit = async (data: SignInFormData) => {
-    setIsLoading(true)
+  const signInMutation = trpc.auth.signIn.useMutation({
+    onSuccess: () => {
+      router.push("/")
+    },
+    onError: (error) => {
+      setError(error.message || "Erro ao fazer login")
+    },
+  })
+
+  const onSubmit = (data: SignInFormData) => {
     setError(null)
-
-    try {
-      const result = await authClient.signIn.email({
-        email: data.email,
-        password: data.password,
-      })
-
-      if (result.error) {
-        setError(result.error.message || "Erro ao fazer login")
-      } else {
-        router.push("/")
-      }
-    } catch {
-      setError("Erro ao fazer login. Tente novamente.")
-    } finally {
-      setIsLoading(false)
-    }
+    signInMutation.mutate({
+      email: data.email,
+      password: data.password,
+    })
   }
 
   return (
@@ -117,9 +111,9 @@ export default function Home() {
             <Button
               type="submit"
               className="w-full bg-zinc-700 text-zinc-100 hover:bg-zinc-600"
-              disabled={isLoading}
+              disabled={signInMutation.isPending}
             >
-              {isLoading ? "Entrando..." : "Entrar"}
+              {signInMutation.isPending ? "Entrando..." : "Entrar"}
             </Button>
           </CardFooter>
         </form>
