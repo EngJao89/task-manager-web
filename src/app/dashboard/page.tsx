@@ -1,43 +1,24 @@
 "use client"
 
 import { RequireAuth } from "@/components/auth/require-auth"
+import { Sidebar } from "@/components/sidebar"
 import { trpc } from "@/lib/trpc/client"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
 
 export default function DashboardPage() {
-  const router = useRouter()
   const { data } = trpc.auth.getCurrentUser.useQuery()
-  const signOutMutation = trpc.auth.signOut.useMutation({
-    onSuccess: () => {
-      router.push("/")
-    },
-  })
-
-  const handleSignOut = () => {
-    signOutMutation.mutate()
-  }
 
   return (
     <RequireAuth>
-      <div className="min-h-screen bg-zinc-800 p-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
+      <div className="flex h-screen bg-zinc-800">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-8">
+            <div className="mb-8">
               <h1 className="text-4xl font-bold text-zinc-100">Dashboard</h1>
               <p className="mt-2 text-zinc-400">
                 Bem-vindo, {data?.user.name}!
               </p>
             </div>
-            <Button
-              onClick={handleSignOut}
-              variant="outline"
-              className="border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100"
-              disabled={signOutMutation.isPending}
-            >
-              {signOutMutation.isPending ? "Saindo..." : "Sair"}
-            </Button>
-          </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-6">
@@ -70,7 +51,8 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-        </div>
+          </div>
+        </main>
       </div>
     </RequireAuth>
   )
