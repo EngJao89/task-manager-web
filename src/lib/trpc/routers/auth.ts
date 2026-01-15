@@ -11,6 +11,11 @@ const signUpSchema = z.object({
   password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
 })
 
+const signInSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+})
+
 export const authRouter = router({
   signUp: publicProcedure
     .input(signUpSchema)
@@ -59,6 +64,43 @@ export const authRouter = router({
           throw error
         }
         throw new Error("Erro desconhecido ao criar conta")
+      }
+    }),
+
+  signIn: publicProcedure
+    .input(signInSchema)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const user = await ctx.db
+          .select()
+          .from(users)
+          .where(eq(users.email, input.email))
+          .limit(1)
+
+        if (user.length === 0) {
+          throw new Error("Email ou senha incorretos")
+        }
+
+        const isValid = await bcrypt.compare(input.password, user[0].password)
+
+        if (!isValid) {
+          throw new Error("Email ou senha incorretos")
+        }
+
+        return {
+          success: true,
+          user: {
+            id: user[0].id,
+            email: user[0].email,
+            name: user[0].name,
+          },
+        }
+      } catch (error) {
+        console.error("SignIn error:", error)
+        if (error instanceof Error) {
+          throw error
+        }
+        throw new Error("Erro desconhecido ao fazer login")
       }
     }),
 })
