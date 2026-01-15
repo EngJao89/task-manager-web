@@ -17,6 +17,16 @@ try {
       updated_at INTEGER NOT NULL
     )
   `)
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      token TEXT NOT NULL UNIQUE,
+      expires_at INTEGER NOT NULL,
+      created_at INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `)
 } catch (error) {
   console.error("Error initializing database:", error)
 }
