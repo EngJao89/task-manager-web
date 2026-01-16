@@ -138,4 +138,24 @@ export const tasksRouter = router({
         success: true,
       }
     }),
+
+  getStats: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.session) {
+      throw new Error("Não autenticado")
+    }
+
+    const allTasks = await ctx.db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.userId, ctx.session.user.id))
+
+    const stats = {
+      total: allTasks.length,
+      pendente: allTasks.filter((t) => t.status === "pendente").length,
+      iniciado: allTasks.filter((t) => t.status === "iniciado").length,
+      finalizado: allTasks.filter((t) => t.status === "finalizado").length,
+    }
+
+    return stats
+  }),
 })

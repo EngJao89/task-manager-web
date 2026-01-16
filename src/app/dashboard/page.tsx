@@ -3,9 +3,12 @@
 import { RequireAuth } from "@/components/auth/require-auth"
 import { Sidebar } from "@/components/sidebar"
 import { trpc } from "@/lib/trpc/client"
+import { Clock, Circle, CheckCircle2, ListTodo } from "lucide-react"
+import Link from "next/link"
 
 export default function DashboardPage() {
   const { data } = trpc.auth.getCurrentUser.useQuery()
+  const { data: stats } = trpc.tasks.getStats.useQuery()
 
   return (
     <RequireAuth>
@@ -37,12 +40,48 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-6">
-              <h2 className="text-xl font-semibold text-zinc-100">Tarefas</h2>
-              <p className="mt-4 text-sm text-zinc-400">
-                Em breve você poderá gerenciar suas tarefas aqui.
-              </p>
-            </div>
+            <Link href="/dashboard/tasks">
+              <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-6 hover:border-zinc-600 transition-colors cursor-pointer">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2">
+                    <ListTodo className="h-5 w-5" />
+                    Tarefas
+                  </h2>
+                  <span className="text-2xl font-bold text-zinc-300">
+                    {stats?.total || 0}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-yellow-400" />
+                      <span className="text-sm text-zinc-400">Pendente</span>
+                    </div>
+                    <span className="text-lg font-semibold text-yellow-400">
+                      {stats?.pendente || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Circle className="h-4 w-4 text-blue-400" />
+                      <span className="text-sm text-zinc-400">Iniciado</span>
+                    </div>
+                    <span className="text-lg font-semibold text-blue-400">
+                      {stats?.iniciado || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-400" />
+                      <span className="text-sm text-zinc-400">Finalizado</span>
+                    </div>
+                    <span className="text-lg font-semibold text-green-400">
+                      {stats?.finalizado || 0}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Link>
 
             <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-6">
               <h2 className="text-xl font-semibold text-zinc-100">Estatísticas</h2>
