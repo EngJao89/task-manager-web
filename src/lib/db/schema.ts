@@ -17,6 +17,23 @@ export const sessions = sqliteTable("sessions", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
 
+export const tasks = sqliteTable("tasks", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status")
+    .notNull()
+    .$type<"iniciado" | "pendente" | "finalizado">()
+    .default("pendente"),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+})
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type Session = typeof sessions.$inferSelect
+export type Task = typeof tasks.$inferSelect
+export type NewTask = typeof tasks.$inferInsert

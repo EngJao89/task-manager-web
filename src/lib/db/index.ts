@@ -27,6 +27,18 @@ try {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
   `)
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT,
+      status TEXT NOT NULL DEFAULT 'pendente',
+      user_id TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `)
 } catch (error) {
   console.error("Error initializing database:", error)
 }
