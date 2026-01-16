@@ -60,10 +60,13 @@ export default function TasksPage() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
+      title: "",
+      description: "",
       status: "pendente",
     },
   })
@@ -79,6 +82,11 @@ export default function TasksPage() {
     onSuccess: () => {
       setEditingTask(null)
       reset()
+      refetch()
+    },
+  })
+  const updateStatusMutation = trpc.tasks.update.useMutation({
+    onSuccess: () => {
       refetch()
     },
   })
@@ -106,11 +114,13 @@ export default function TasksPage() {
     status: "iniciado" | "pendente" | "finalizado"
   }) => {
     setEditingTask(task.id)
-    reset({
-      title: task.title,
-      description: task.description || "",
-      status: task.status,
-    })
+    setValue("title", task.title)
+    setValue("description", task.description || "")
+    setValue("status", task.status)
+    setTimeout(() => {
+      const formElement = document.getElementById("task-form")
+      formElement?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }, 100)
   }
 
   const handleCancel = () => {
@@ -153,7 +163,11 @@ export default function TasksPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <form
+                      id="task-form"
+                      onSubmit={handleSubmit(onSubmit)}
+                      className="space-y-4"
+                    >
                       <div className="space-y-2">
                         <Label htmlFor="title" className="text-zinc-200">
                           Título
@@ -267,14 +281,32 @@ export default function TasksPage() {
                                   <StatusIcon
                                     className={cn("h-5 w-5", statusInfo.color)}
                                   />
-                                  <span
+                                  <select
+                                    value={task.status}
+                                    onChange={(e) => {
+                                      const newStatus = e.target.value as "iniciado" | "pendente" | "finalizado"
+                                      updateStatusMutation.mutate({
+                                        id: task.id,
+                                        status: newStatus,
+                                      })
+                                    }}
+                                    disabled={updateStatusMutation.isPending}
                                     className={cn(
-                                      "text-sm font-medium",
-                                      statusInfo.color
+                                      "text-sm font-medium bg-zinc-800/50 border border-zinc-700 rounded-md px-3 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:border-zinc-600 transition-all",
+                                      statusInfo.color,
+                                      "hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed"
                                     )}
                                   >
-                                    {statusInfo.label}
-                                  </span>
+                                    <option value="pendente" className="bg-zinc-900 text-yellow-400">
+                                      Pendente
+                                    </option>
+                                    <option value="iniciado" className="bg-zinc-900 text-blue-400">
+                                      Iniciado
+                                    </option>
+                                    <option value="finalizado" className="bg-zinc-900 text-green-400">
+                                      Finalizado
+                                    </option>
+                                  </select>
                                 </div>
                                 <h3 className="text-lg font-semibold text-zinc-100 mb-2">
                                   {task.title}
