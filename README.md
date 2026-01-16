@@ -63,32 +63,32 @@ Este é um projeto de gerenciamento de tarefas dinamico, criado com Next.js, Sha
   Este projeto foi desenvolvido com base em várias decisões arquiteturais, aqui estão algumas das principais:
 
   ### **Autenticação:**
-  
-  Inicialmente, o projeto foi planejado para usar **Better Auth** como biblioteca principal de autenticação. Durante o desenvolvimento, aprendi muito sobre o Better Auth através de:
+
+  Inicialmente, o projeto foi planejado para usar **Better Auth** como biblioteca principal de autenticação. Durante o desenvolvimento, aprendi  muito sobre o Better Auth através de:
   - Documentação oficial
   - Vídeos tutoriais
   - Exemplos de código da comunidade
-  
-  No entanto, após experimentar com o Better Auth, decidimos implementar uma solução customizada de autenticação que melhor se adequava às necessidades do projeto:
-  
+
+  No entanto, após experimentar com o Better Auth, decidimos implementar uma solução customizada de autenticação que melhor se adequava às  necessidades do projeto:
+
   **Solução implementada:**
   - **JWT (JSON Web Tokens)** usando a biblioteca `jose` para criação e verificação de tokens
   - **Sessões no banco de dados** (tabela `sessions`) para rastreamento e controle de sessões ativas
   - **Cookies HTTP-only** para armazenamento seguro do token no cliente
   - **tRPC** para gerenciar as rotas de autenticação (signIn, signUp, signOut, getCurrentUser)
-  
+
   **Por que essa decisão?**
   - Maior controle sobre o fluxo de autenticação
   - Integração mais simples com o Drizzle ORM já utilizado no projeto
   - Flexibilidade para customizar comportamentos específicos
   - Melhor alinhamento com a arquitetura tRPC escolhida
-  
+
   **Aprendizados:**
   - Gerenciamento de sessões com expiração
   - Uso de cookies HTTP-only para segurança
   - Proteção de rotas com middleware customizado
   - Integração de autenticação com tRPC e Next.js App Router
-  
+
   ### **Persistência de Dados e Database:**
 
   Assim como com a autenticação, não tinha conhecimento prévio sobre ORMs e persistência de dados. O aprendizado foi feito através de:
@@ -134,7 +134,7 @@ Este é um projeto de gerenciamento de tarefas dinamico, criado com Next.js, Sha
   - Queries type-safe com Drizzle (select, insert, update, delete)
   - Gerenciamento de timestamps e tipos de dados
   - Inicialização automática de banco de dados em aplicações Node.js
-  
+
   ### **tRPC (Type-Safe API):**
 
   Assim como com autenticação e persistência de dados, não tinha conhecimento prévio sobre tRPC. O aprendizado foi feito através de:
@@ -191,3 +191,50 @@ Este é um projeto de gerenciamento de tarefas dinamico, criado com Next.js, Sha
   - Type inference automático e como aproveitar ao máximo
   - Tratamento de erros customizado com TRPCError
   - Diferença entre queries (leitura) e mutations (escrita) no tRPC
+
+  ### **Estilização:**
+
+  Com mais de 5 anos de experiência em estilização e design de interfaces, as decisões sobre estilização foram baseadas em conhecimento   consolidado e melhores práticas da indústria.
+
+  **Solução implementada:**
+  - **Tailwind CSS v4** como framework de CSS utilitário
+    - Estilização rápida e consistente através de classes utilitárias
+    - Configuração simplificada com `@import "tailwindcss"` no CSS
+    - Sistema de cores customizado usando a paleta zinc
+    - Animações customizadas definidas em `@layer utilities`
+  - **Shadcn/ui** como biblioteca de componentes
+    - Componentes acessíveis e bem estruturados
+    - Estilo "new-york" para uma aparência moderna e limpa
+    - Componentes copiados para o projeto (não dependência), permitindo customização total
+    - Integração perfeita com Tailwind CSS
+  - **Lucide React** para ícones
+    - Ícones consistentes e modernos
+    - Tree-shaking automático para otimização de bundle
+    - Fácil customização de tamanho e cor via props
+
+  **Decisões de design:**
+  - **Tema escuro**: Paleta zinc (zinc-800, zinc-900) como base para uma experiência visual moderna
+  - **Tipografia**: Fontes Geist (Sans e Mono) do Google Fonts para legibilidade e modernidade
+  - **Animações sutis**: Animação `fadeInDown` customizada para melhorar a experiência de entrada
+  - **Consistência visual**: Uso de classes Tailwind diretas em vez de tokens CSS customizados para maior controle
+
+  **Estrutura de estilos:**
+  - `src/app/globals.css`: Estilos globais, reset básico e animações customizadas
+  - `src/components/ui/`: Componentes Shadcn/ui customizados e prontos para uso
+  - Classes utilitárias do Tailwind aplicadas diretamente nos componentes
+  - Função `cn()` (clsx + tailwind-merge) para combinação inteligente de classes
+
+  **Por que essas decisões?**
+  - **Produtividade**: Tailwind CSS acelera significativamente o desenvolvimento de interfaces
+  - **Manutenibilidade**: Classes utilitárias são mais fáceis de manter que CSS customizado
+  - **Consistência**: Shadcn/ui garante componentes acessíveis e bem testados
+  - **Flexibilidade**: Componentes copiados permitem ajustes sem limitações de biblioteca
+  - **Performance**: Tailwind CSS purga classes não utilizadas automaticamente
+  - **Experiência**: Baseado em anos de experiência, essas ferramentas oferecem o melhor equilíbrio entre produtividade e controle
+
+  **Aspectos técnicos:**
+  - Uso de `@layer` do Tailwind para organização de estilos
+  - Animações CSS customizadas integradas ao sistema de utilities
+  - Variantes de componentes usando `class-variance-authority` (CVA)
+  - Responsividade mobile-first com breakpoints do Tailwind
+  - Suporte a dark mode através da paleta zinc (preparado para futura expansão)
