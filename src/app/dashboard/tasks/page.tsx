@@ -1,22 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { CheckCircle2, Circle, Clock, Trash2, Edit2 } from "lucide-react"
+import { toast } from "react-toastify"
+
+import type { Task } from "@/types/tasks"
+import { cn } from "@/lib/utils"
+import { trpc } from "@/lib/trpc/client"
 import { RequireAuth } from "@/components/auth/require-auth"
 import { Sidebar } from "@/components/sidebar"
-import { trpc } from "@/lib/trpc/client"
+import { TaskForm } from "@/components/TaskForm"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 import {
   AlertDialog,
@@ -28,17 +25,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { CheckCircle2, Circle, Clock, Trash2, Edit2 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { toast } from "react-toastify"
-
-const taskSchema = z.object({
-  title: z.string().min(1, "Título é obrigatório"),
-  description: z.string().optional(),
-  status: z.enum(["iniciado", "pendente", "finalizado"]),
-})
-
-type TaskFormData = z.infer<typeof taskSchema>
 
 const statusConfig = {
   pendente: {
@@ -65,57 +51,10 @@ const statusConfig = {
 }
 
 export default function TasksPage() {
-  const [editingTask, setEditingTask] = useState<string | null>(null)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<TaskFormData>({
-    resolver: zodResolver(taskSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      status: "pendente",
-    },
-  })
-
   const { data, refetch } = trpc.tasks.list.useQuery()
-  const createMutation = trpc.tasks.create.useMutation({
-    onSuccess: () => {
-      setEditingTask(null)
-      reset({
-        title: "",
-        description: "",
-        status: "pendente",
-      })
-      refetch()
-      toast.success("Task criada com sucesso!")
-    },
-    onError: (error) => {
-      console.error("Erro ao criar task:", error)
-      toast.error(error.message || "Erro ao criar task. Tente novamente.")
-    },
-  })
-  const updateMutation = trpc.tasks.update.useMutation({
-    onSuccess: () => {
-      setEditingTask(null)
-      reset({
-        title: "",
-        description: "",
-        status: "pendente",
-      })
-      refetch()
-      toast.success("Task atualizada com sucesso!")
-    },
-    onError: (error) => {
-      console.error("Erro ao atualizar task:", error)
-      toast.error(error.message || "Erro ao atualizar task. Tente novamente.")
-    },
-  })
   const updateStatusMutation = trpc.tasks.update.useMutation({
     onSuccess: () => {
       refetch()
@@ -132,40 +71,17 @@ export default function TasksPage() {
     },
   })
 
-  const onSubmit = (data: TaskFormData) => {
-    if (editingTask) {
-      updateMutation.mutate({
-        id: editingTask,
-        ...data,
-      })
-    } else {
-      createMutation.mutate(data)
-    }
-  }
-
-  const handleEdit = (task: {
-    id: string
-    title: string
-    description: string | null
-    status: "iniciado" | "pendente" | "finalizado"
-  }) => {
-    setEditingTask(task.id)
-    setValue("title", task.title)
-    setValue("description", task.description || "")
-    setValue("status", task.status)
-    setTimeout(() => {
-      const formElement = document.getElementById("task-form")
-      formElement?.scrollIntoView({ behavior: "smooth", block: "start" })
-    }, 100)
+  const handleEdit = (task: Task) => {
+    setEditingTask(task)
   }
 
   const handleCancel = () => {
     setEditingTask(null)
-    reset({
-      title: "",
-      description: "",
-      status: "pendente",
-    })
+  }
+
+  const handleFormSuccess = () => {
+    setEditingTask(null)
+    refetch()
   }
 
   const handleDelete = (id: string) => {
@@ -207,99 +123,11 @@ export default function TasksPage() {
             </div>
 
             <div className="grid gap-6 lg:grid-cols-3">
-              <div className="lg:col-span-1">
-                <Card className="border-zinc-700 bg-zinc-900">
-                  <CardHeader>
-                    <CardTitle className="text-zinc-100">
-                      {editingTask ? "Editar Task" : "Nova Task"}
-                    </CardTitle>
-                    <CardDescription className="text-zinc-400">
-                      {editingTask
-                        ? "Atualize os dados da task"
-                        : "Crie uma nova task"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form
-                      id="task-form"
-                      onSubmit={handleSubmit(onSubmit)}
-                      className="space-y-4"
-                    >
-                      <div className="space-y-2">
-                        <Label htmlFor="title" className="text-zinc-200">
-                          Título
-                        </Label>
-                        <Input
-                          id="title"
-                          className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500"
-                          {...register("title")}
-                          aria-invalid={errors.title ? "true" : "false"}
-                        />
-                        {errors.title && (
-                          <p className="text-sm text-red-400">
-                            {errors.title.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="description" className="text-zinc-200">
-                          Descrição
-                        </Label>
-                        <Textarea
-                          id="description"
-                          className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500"
-                          {...register("description")}
-                          rows={4}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="status" className="text-zinc-200">
-                          Status
-                        </Label>
-                        <select
-                          id="status"
-                          className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-600 disabled:cursor-not-allowed disabled:opacity-50"
-                          {...register("status")}
-                        >
-                          <option value="pendente">Pendente</option>
-                          <option value="iniciado">Iniciado</option>
-                          <option value="finalizado">Finalizado</option>
-                        </select>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <Button
-                          type="submit"
-                          className="flex-1 bg-zinc-700 text-zinc-100 hover:bg-zinc-600"
-                          disabled={
-                            createMutation.isPending || updateMutation.isPending
-                          }
-                        >
-                          {editingTask
-                            ? updateMutation.isPending
-                              ? "Salvando..."
-                              : "Salvar"
-                            : createMutation.isPending
-                              ? "Criando..."
-                              : "Criar"}
-                        </Button>
-                        {editingTask && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleCancel}
-                            className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
-                          >
-                            Cancelar
-                          </Button>
-                        )}
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-              </div>
+              <TaskForm
+                editingTask={editingTask}
+                onCancel={handleCancel}
+                onSuccess={handleFormSuccess}
+              />
 
               <div className="lg:col-span-2">
                 <div className="space-y-4">
