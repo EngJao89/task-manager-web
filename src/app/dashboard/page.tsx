@@ -1,16 +1,28 @@
 "use client"
 
-import { RequireAuth } from "@/components/auth/require-auth"
-import { Sidebar } from "@/components/sidebar"
+import Link from "next/link"
 import { trpc } from "@/lib/trpc/client"
 import { Clock, Circle, CheckCircle2, ListTodo } from "lucide-react"
-import Link from "next/link"
+import { 
+  PieChart, 
+  Pie, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Cell 
+} from "recharts"
+
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts"
+import { RequireAuth } from "@/components/auth/require-auth"
+import { Sidebar } from "@/components/sidebar"
+import { AccountInfo } from "@/components/AccountInfo"
+
 
 export default function DashboardPage() {
   const { data } = trpc.auth.getCurrentUser.useQuery()
@@ -30,21 +42,7 @@ export default function DashboardPage() {
             </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6">
-            <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-6">
-              <h2 className="text-xl font-semibold text-zinc-100">
-                Informações da Conta
-              </h2>
-              <div className="mt-4 space-y-2 text-sm text-zinc-400">
-                <p>
-                  <span className="font-medium text-zinc-300">Email:</span>{" "}
-                  {data?.user.email}
-                </p>
-                <p>
-                  <span className="font-medium text-zinc-300">Nome:</span>{" "}
-                  {data?.user.name}
-                </p>
-              </div>
-            </div>
+            <AccountInfo />
 
             <Link href="/dashboard/tasks">
               <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-6 hover:border-zinc-600 transition-colors cursor-pointer">
