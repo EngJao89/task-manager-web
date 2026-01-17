@@ -2,11 +2,17 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, Users, CheckSquare, LogOut } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { 
+  LayoutDashboard, 
+  Users, 
+  CheckSquare, 
+  LogOut 
+} from "lucide-react"
+import { toast } from "react-toastify"
+
 import { cn } from "@/lib/utils"
 import { trpc } from "@/lib/trpc/client"
-import { toast } from "react-toastify"
+import { Button } from "@/components/ui/button"
 
 const navigation = [
   {
