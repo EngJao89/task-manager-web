@@ -18,3 +18,12 @@ export interface TaskFormProps {
   readonly onCancel: () => void
   readonly onSuccess: () => void
 }
+
+export interface TaskCardProps {
+  readonly task: Task
+  readonly onEdit: (task: Task) => void
+  readonly onDelete: (id: string) => void
+  readonly onStatusChange: (id: string, status: "iniciado" | "pendente" | "finalizado") => void
+  readonly isUpdatingStatus?: boolean
+  readonly isDeleting?: boolean
+}
