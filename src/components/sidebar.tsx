@@ -6,6 +6,7 @@ import { LayoutDashboard, Users, CheckSquare, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { trpc } from "@/lib/trpc/client"
+import { toast } from "react-toastify"
 
 const navigation = [
   {
@@ -30,7 +31,11 @@ export function Sidebar() {
   const router = useRouter()
   const signOutMutation = trpc.auth.signOut.useMutation({
     onSuccess: () => {
+      toast.success("Logout realizado com sucesso!")
       router.push("/")
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao fazer logout")
     },
   })
 

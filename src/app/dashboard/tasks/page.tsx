@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/card"
 import { CheckCircle2, Circle, Clock, Trash2, Edit2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { toast } from "react-toastify"
 
 const taskSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
@@ -74,20 +75,44 @@ export default function TasksPage() {
   const { data, refetch } = trpc.tasks.list.useQuery()
   const createMutation = trpc.tasks.create.useMutation({
     onSuccess: () => {
-      reset()
+      setEditingTask(null)
+      reset({
+        title: "",
+        description: "",
+        status: "pendente",
+      })
       refetch()
+      toast.success("Task criada com sucesso!")
+    },
+    onError: (error) => {
+      console.error("Erro ao criar task:", error)
+      toast.error(error.message || "Erro ao criar task. Tente novamente.")
     },
   })
   const updateMutation = trpc.tasks.update.useMutation({
     onSuccess: () => {
       setEditingTask(null)
-      reset()
+      reset({
+        title: "",
+        description: "",
+        status: "pendente",
+      })
       refetch()
+      toast.success("Task atualizada com sucesso!")
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar task:", error)
+      toast.error(error.message || "Erro ao atualizar task. Tente novamente.")
     },
   })
   const updateStatusMutation = trpc.tasks.update.useMutation({
     onSuccess: () => {
       refetch()
+      toast.success("Status atualizado com sucesso!")
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar status:", error)
+      toast.error(error.message || "Erro ao atualizar status. Tente novamente.")
     },
   })
   const deleteMutation = trpc.tasks.delete.useMutation({
@@ -125,12 +150,27 @@ export default function TasksPage() {
 
   const handleCancel = () => {
     setEditingTask(null)
-    reset()
+    reset({
+      title: "",
+      description: "",
+      status: "pendente",
+    })
   }
 
   const handleDelete = (id: string) => {
     if (confirm("Tem certeza que deseja excluir esta task?")) {
-      deleteMutation.mutate({ id })
+      deleteMutation.mutate(
+        { id },
+        {
+          onSuccess: () => {
+            toast.success("Task excluída com sucesso!")
+          },
+          onError: (error) => {
+            console.error("Erro ao excluir task:", error)
+            toast.error(error.message || "Erro ao excluir task. Tente novamente.")
+          },
+        }
+      )
     }
   }
 

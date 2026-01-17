@@ -6,6 +6,7 @@ import * as z from "zod"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { trpc } from "@/lib/trpc/client"
+import { toast } from "react-toastify"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -45,10 +46,13 @@ export default function SignUpPage() {
 
   const signUpMutation = trpc.auth.signUp.useMutation({
     onSuccess: () => {
+      toast.success("Conta criada com sucesso! Faça login para continuar.")
       router.push("/")
     },
     onError: (error) => {
-      setError(error.message || "Erro ao criar conta")
+      const errorMessage = error.message || "Erro ao criar conta"
+      setError(errorMessage)
+      toast.error(errorMessage)
     },
   })
 
