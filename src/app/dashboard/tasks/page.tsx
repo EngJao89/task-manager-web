@@ -18,6 +18,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { CheckCircle2, Circle, Clock, Trash2, Edit2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "react-toastify"
@@ -56,6 +66,7 @@ const statusConfig = {
 
 export default function TasksPage() {
   const [editingTask, setEditingTask] = useState<string | null>(null)
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
 
   const {
     register,
@@ -158,16 +169,22 @@ export default function TasksPage() {
   }
 
   const handleDelete = (id: string) => {
-    if (confirm("Tem certeza que deseja excluir esta task?")) {
+    setTaskToDelete(id)
+  }
+
+  const confirmDelete = () => {
+    if (taskToDelete) {
       deleteMutation.mutate(
-        { id },
+        { id: taskToDelete },
         {
           onSuccess: () => {
             toast.success("Task excluída com sucesso!")
+            setTaskToDelete(null)
           },
           onError: (error) => {
             console.error("Erro ao excluir task:", error)
             toast.error(error.message || "Erro ao excluir task. Tente novamente.")
+            setTaskToDelete(null)
           },
         }
       )
@@ -394,6 +411,31 @@ export default function TasksPage() {
           </div>
         </main>
       </div>
+
+      <AlertDialog open={taskToDelete !== null} onOpenChange={(open) => !open && setTaskToDelete(null)}>
+        <AlertDialogContent className="bg-zinc-900 border-zinc-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-zinc-100">
+              Confirmar exclusão
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              Tem certeza que deseja excluir esta task? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </RequireAuth>
   )
 }

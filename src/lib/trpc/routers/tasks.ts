@@ -23,27 +23,39 @@ export const tasksRouter = router({
   create: protectedProcedure
     .input(createTaskSchema)
     .mutation(async ({ input, ctx }) => {
-      if (!ctx.session) {
-        throw new Error("Não autenticado")
-      }
+      try {
+        if (!ctx.session) {
+          throw new Error("Não autenticado")
+        }
 
-      const now = new Date()
-      const newTask = await ctx.db
-        .insert(tasks)
-        .values({
-          id: nanoid(),
-          title: input.title,
-          description: input.description || "",
-          status: input.status || "pendente",
-          userId: ctx.session.user.id,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()
+        const now = new Date()
+        const newTask = await ctx.db
+          .insert(tasks)
+          .values({
+            id: nanoid(),
+            title: input.title,
+            description: input.description && input.description.trim() !== "" ? input.description : null,
+            status: input.status || "pendente",
+            userId: ctx.session.user.id,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .returning()
 
-      return {
-        success: true,
-        task: newTask[0],
+        if (!newTask[0]) {
+          throw new Error("Erro ao criar task")
+        }
+
+        return {
+          success: true,
+          task: newTask[0],
+        }
+      } catch (error) {
+        console.error("Create task error:", error)
+        if (error instanceof Error) {
+          throw error
+        }
+        throw new Error("Erro desconhecido ao criar task")
       }
     }),
 

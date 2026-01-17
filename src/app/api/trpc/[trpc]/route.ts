@@ -8,8 +8,11 @@ const handler = (req: Request) =>
     req,
     router: appRouter,
     createContext: async () => createContext(),
-    onError: ({ error, path }) => {
+    onError: ({ error, path, input }) => {
       console.error(`tRPC Error on '${path}':`, error)
+      console.error("Input:", input)
+      console.error("Error message:", error.message)
+      console.error("Error stack:", error.stack)
     },
   })
 
