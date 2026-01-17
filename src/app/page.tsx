@@ -6,6 +6,7 @@ import * as z from "zod"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { trpc } from "@/lib/trpc/client"
+import { toast } from "react-toastify"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -40,10 +41,13 @@ export default function Home() {
 
   const signInMutation = trpc.auth.signIn.useMutation({
     onSuccess: () => {
+      toast.success("Login realizado com sucesso!")
       router.push("/dashboard")
     },
     onError: (error) => {
-      setError(error.message || "Erro ao fazer login")
+      const errorMessage = error.message || "Erro ao fazer login"
+      setError(errorMessage)
+      toast.error(errorMessage)
     },
   })
 
