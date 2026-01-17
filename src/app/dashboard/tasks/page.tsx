@@ -10,21 +10,12 @@ import { trpc } from "@/lib/trpc/client"
 import { RequireAuth } from "@/components/auth/require-auth"
 import { Sidebar } from "@/components/sidebar"
 import { TaskForm } from "@/components/TaskForm"
+import { Alert } from "@/components/Alert"
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
 } from "@/components/ui/card"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 
 const statusConfig = {
   pendente: {
@@ -55,6 +46,18 @@ export default function TasksPage() {
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
 
   const { data, refetch } = trpc.tasks.list.useQuery()
+  const deleteMutation = trpc.tasks.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Task excluída com sucesso!")
+      setTaskToDelete(null)
+      refetch()
+    },
+    onError: (error) => {
+      console.error("Erro ao excluir task:", error)
+      toast.error(error.message || "Erro ao excluir task. Tente novamente.")
+      setTaskToDelete(null)
+    },
+  })
   const updateStatusMutation = trpc.tasks.update.useMutation({
     onSuccess: () => {
       refetch()
@@ -63,11 +66,6 @@ export default function TasksPage() {
     onError: (error) => {
       console.error("Erro ao atualizar status:", error)
       toast.error(error.message || "Erro ao atualizar status. Tente novamente.")
-    },
-  })
-  const deleteMutation = trpc.tasks.delete.useMutation({
-    onSuccess: () => {
-      refetch()
     },
   })
 
@@ -90,20 +88,7 @@ export default function TasksPage() {
 
   const confirmDelete = () => {
     if (taskToDelete) {
-      deleteMutation.mutate(
-        { id: taskToDelete },
-        {
-          onSuccess: () => {
-            toast.success("Task excluída com sucesso!")
-            setTaskToDelete(null)
-          },
-          onError: (error) => {
-            console.error("Erro ao excluir task:", error)
-            toast.error(error.message || "Erro ao excluir task. Tente novamente.")
-            setTaskToDelete(null)
-          },
-        }
-      )
+      deleteMutation.mutate({ id: taskToDelete })
     }
   }
 
@@ -240,30 +225,16 @@ export default function TasksPage() {
         </main>
       </div>
 
-      <AlertDialog open={taskToDelete !== null} onOpenChange={(open) => !open && setTaskToDelete(null)}>
-        <AlertDialogContent className="bg-zinc-900 border-zinc-700">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-zinc-100">
-              Confirmar exclusão
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">
-              Tem certeza que deseja excluir esta task? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-red-600 text-white hover:bg-red-700"
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Alert
+        open={taskToDelete !== null}
+        onOpenChange={(open) => !open && setTaskToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Confirmar exclusão"
+        description="Tem certeza que deseja excluir esta task? Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        isLoading={deleteMutation.isPending}
+      />
     </RequireAuth>
   )
 }
