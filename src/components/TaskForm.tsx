@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "react-toastify"
@@ -8,6 +8,7 @@ import * as z from "zod"
 
 import type { TaskFormData, TaskFormProps } from "@/types/tasks"
 import { trpc } from "@/lib/trpc/client"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,24 +27,45 @@ const taskSchema = z.object({
   status: z.enum(["iniciado", "pendente", "finalizado"]),
 })
 
+function useCurrentUserId() {
+  const { data } = trpc.auth.getCurrentUser.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    staleTime: Infinity,
+  })
+  return data?.user.id
+}
+
 export function TaskForm({
   editingTask,
   onCancel,
   onSuccess,
-}: TaskFormProps) {
+}: Readonly<TaskFormProps>) {
+  const currentUserId = useCurrentUserId()
+  
+  const defaultValues = useMemo(() => {
+    if (editingTask) {
+      return {
+        title: editingTask.title,
+        description: editingTask.description || "",
+        status: editingTask.status,
+      }
+    }
+    return {
+      title: "",
+      description: "",
+      status: "pendente" as const,
+    }
+  }, [editingTask])
+
   const {
     register,
     handleSubmit,
     reset,
-    setValue,
     formState: { errors },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      status: "pendente",
-    },
+    defaultValues,
   })
 
   const createMutation = trpc.tasks.create.useMutation({
@@ -80,10 +102,12 @@ export function TaskForm({
 
   useEffect(() => {
     if (editingTask) {
-      setValue("title", editingTask.title)
-      setValue("description", editingTask.description || "")
-      setValue("status", editingTask.status)
-
+      reset({
+        title: editingTask.title,
+        description: editingTask.description || "",
+        status: editingTask.status,
+      }, { keepDefaultValues: false })
+      
       if (globalThis.window !== undefined) {
         setTimeout(() => {
           const formElement = document.getElementById("task-form")
@@ -95,9 +119,10 @@ export function TaskForm({
         title: "",
         description: "",
         status: "pendente",
-      })
+      }, { keepDefaultValues: false })
     }
-  }, [editingTask, setValue, reset])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingTask?.id, reset])
 
   const handleFormSubmit = (data: TaskFormData) => {
     if (editingTask) {
@@ -134,6 +159,7 @@ export function TaskForm({
         </CardHeader>
         <CardContent>
           <form
+            key={`${currentUserId || "loading"}-${editingTask?.id || "new-task"}`}
             id="task-form"
             onSubmit={handleSubmit(handleFormSubmit)}
             className="space-y-4"

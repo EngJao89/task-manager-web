@@ -1,15 +1,20 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { trpc } from "@/lib/trpc/client"
 
-export function RequireAuth({ children }: { children: React.ReactNode }) {
+export function RequireAuth({ children }: Readonly<{ children: React.ReactNode }>) {
   const router = useRouter()
-  const { data, isLoading, error } = trpc.auth.getCurrentUser.useQuery()
+  const hasRedirected = useRef(false)
+  const { data, isLoading, error } = trpc.auth.getCurrentUser.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  })
 
   useEffect(() => {
-    if (!isLoading && (error || !data)) {
+    if (!isLoading && (error || !data) && !hasRedirected.current) {
+      hasRedirected.current = true
       router.push("/")
     }
   }, [isLoading, error, data, router])

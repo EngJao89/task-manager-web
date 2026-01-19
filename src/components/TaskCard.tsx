@@ -37,6 +37,7 @@ export function TaskCard({
   onStatusChange,
   isUpdatingStatus = false,
   isDeleting = false,
+  showActions = true,
 }: TaskCardProps) {
   const statusInfo = statusConfig[task.status]
   const StatusIcon = statusInfo.icon
@@ -94,25 +95,27 @@ export function TaskCard({
               )}
             </p>
           </div>
-          <div className="flex gap-2 ml-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onEdit(task)}
-              className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-            >
-              <Edit2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDelete(task.id)}
-              className="text-zinc-400 hover:text-red-400 hover:bg-zinc-800"
-              disabled={isDeleting}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          {showActions && (
+            <div className="flex gap-2 ml-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onEdit(task)}
+                className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onDelete(task.id)}
+                className="text-zinc-400 hover:text-red-400 hover:bg-zinc-800"
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

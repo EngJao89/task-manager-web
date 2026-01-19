@@ -17,12 +17,12 @@ export default function UsersPage() {
     if (users && users.length > 0) {
       return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {users.map((user: { id: string; name: string; email: string; createdAt: Date }) => (
+          {users.map((user: { id: string; name: string; email: string; createdAt: string | Date }) => (
             <UserCard
               key={user.id}
               name={user.name}
               email={user.email}
-              createdAt={user.createdAt}
+              createdAt={new Date(user.createdAt)}
             />
           ))}
         </div>
