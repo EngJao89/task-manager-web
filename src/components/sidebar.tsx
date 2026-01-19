@@ -9,6 +9,7 @@ import {
   LogOut 
 } from "lucide-react"
 import { toast } from "react-toastify"
+import { useQueryClient } from "@tanstack/react-query"
 
 import { cn } from "@/lib/utils"
 import { trpc } from "@/lib/trpc/client"
@@ -35,8 +36,11 @@ const navigation = [
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const queryClient = useQueryClient()
+  
   const signOutMutation = trpc.auth.signOut.useMutation({
     onSuccess: () => {
+      queryClient.clear()
       toast.success("Logout realizado com sucesso!")
       router.push("/")
     },

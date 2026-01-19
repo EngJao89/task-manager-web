@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "react-toastify"
+import { useQueryClient } from "@tanstack/react-query"
 import * as z from "zod"
 
 import { trpc } from "@/lib/trpc/client"
@@ -29,6 +30,7 @@ type SignInFormData = z.infer<typeof signInSchema>
 
 export default function Home() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
 
   const {
@@ -41,6 +43,7 @@ export default function Home() {
 
   const signInMutation = trpc.auth.signIn.useMutation({
     onSuccess: () => {
+      queryClient.invalidateQueries()
       toast.success("Login realizado com sucesso!")
       router.push("/dashboard")
     },
