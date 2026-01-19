@@ -1,10 +1,37 @@
 "use client"
 
+import { trpc } from "@/lib/trpc/client"
 import { RequireAuth } from "@/components/auth/require-auth"
 import { Sidebar } from "@/components/sidebar"
 import { UsersEmpty } from "@/components/UsersEmpty"
+import { UserCard } from "@/components/UserCard"
 
 export default function UsersPage() {
+  const { data: users, isLoading } = trpc.auth.list.useQuery()
+
+  const renderContent = () => {
+    if (isLoading) {
+      return <div className="text-zinc-400">Carregando usuários...</div>
+    }
+
+    if (users && users.length > 0) {
+      return (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {users.map((user: { id: string; name: string; email: string; createdAt: Date }) => (
+            <UserCard
+              key={user.id}
+              name={user.name}
+              email={user.email}
+              createdAt={user.createdAt}
+            />
+          ))}
+        </div>
+      )
+    }
+
+    return <UsersEmpty />
+  }
+
   return (
     <RequireAuth>
       <div className="flex h-screen bg-zinc-800">
@@ -18,7 +45,7 @@ export default function UsersPage() {
               </p>
             </div>
 
-            <UsersEmpty />
+            {renderContent()}
           </div>
         </main>
       </div>

@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { router, publicProcedure, protectedProcedure } from "../init"
 import { users } from "@/lib/db/schema"
-import { eq } from "drizzle-orm"
+import { eq, desc } from "drizzle-orm"
 import { nanoid } from "nanoid"
 import bcrypt from "bcryptjs"
 import { createSession } from "@/lib/session"
@@ -127,5 +127,24 @@ export const authRouter = router({
     await ctx.setCookie("session-token", "", { maxAge: 0 })
 
     return { success: true }
+  }),
+
+  list: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const allUsers = await ctx.db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          createdAt: users.createdAt,
+        })
+        .from(users)
+        .orderBy(desc(users.createdAt))
+
+      return allUsers
+    } catch (error) {
+      console.error("List users error:", error)
+      throw new Error("Erro ao buscar usuários")
+    }
   }),
 })
