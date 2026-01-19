@@ -10,10 +10,7 @@ import { Sidebar } from "@/components/sidebar"
 import { TaskForm } from "@/components/TaskForm"
 import { TaskCard } from "@/components/TaskCard"
 import { Alert } from "@/components/Alert"
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card"
+import { CardEmpty } from "@/components/CardEmpty"
 
 export default function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
@@ -98,13 +95,7 @@ export default function TasksPage() {
               <div className="lg:col-span-2">
                 <div className="space-y-4">
                   {tasks.length === 0 ? (
-                    <Card className="border-zinc-700 bg-zinc-900">
-                      <CardContent className="py-12 text-center">
-                        <p className="text-zinc-400">
-                          Nenhuma task criada ainda. Crie sua primeira task!
-                        </p>
-                      </CardContent>
-                    </Card>
+                    <CardEmpty />
                   ) : (
                     tasks.map((task: Task) => (
                       <TaskCard

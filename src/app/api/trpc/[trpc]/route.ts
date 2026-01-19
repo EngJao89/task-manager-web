@@ -10,9 +10,17 @@ const handler = (req: Request) =>
     createContext: async () => createContext(),
     onError: ({ error, path, input }) => {
       console.error(`tRPC Error on '${path}':`, error)
-      console.error("Input:", input)
-      console.error("Error message:", error.message)
-      console.error("Error stack:", error.stack)
+      if (input) {
+        console.error("Input:", input)
+      }
+      if (error instanceof Error) {
+        console.error("Error message:", error.message)
+        if (error.stack) {
+          console.error("Error stack:", error.stack)
+        }
+      } else {
+        console.error("Error:", error)
+      }
     },
   })
 
