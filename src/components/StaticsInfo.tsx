@@ -25,6 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { StaticsInfoEmpty } from "@/components/StaticsInfoEmpty"
 
 export function StaticsInfo() {
   const { data: stats } = trpc.tasks.getStats.useQuery()
@@ -136,9 +137,7 @@ export function StaticsInfo() {
             </ChartContainer>
           </div>
         ) : (
-          <p className="text-sm text-zinc-400">
-            Crie tasks para ver as estatísticas aqui.
-          </p>
+          <StaticsInfoEmpty />
         )}
       </CardContent>
     </Card>
