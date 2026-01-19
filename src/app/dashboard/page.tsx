@@ -25,7 +25,11 @@ export default function DashboardPage() {
   const { data } = trpc.auth.getCurrentUser.useQuery()
   const { data: tasksData } = trpc.tasks.list.useQuery()
 
-  const recentTasks = tasksData?.tasks?.slice(0, 3) || []
+  const recentTasks = (tasksData?.tasks?.slice(0, 3) || []).map((task: { id: string; title: string; description: string | null; status: "iniciado" | "pendente" | "finalizado"; createdAt: string | Date; updatedAt: string | Date }) => ({
+    ...task,
+    createdAt: new Date(task.createdAt),
+    updatedAt: new Date(task.updatedAt),
+  })) as Task[]
 
   return (
     <RequireAuth>
@@ -75,13 +79,14 @@ export default function DashboardPage() {
                 <CardContent>
                   {recentTasks.length > 0 ? (
                     <div className="space-y-4">
-                      {recentTasks.map((task: Task) => (
+                      {recentTasks.map((task) => (
                         <TaskCard
                           key={task.id}
                           task={task}
                           onEdit={() => {}}
                           onDelete={() => {}}
                           onStatusChange={() => {}}
+                          showActions={false}
                         />
                       ))}
                     </div>

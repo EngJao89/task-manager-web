@@ -26,4 +26,5 @@ export interface TaskCardProps {
   readonly onStatusChange: (id: string, status: "iniciado" | "pendente" | "finalizado") => void
   readonly isUpdatingStatus?: boolean
   readonly isDeleting?: boolean
+  readonly showActions?: boolean
 }

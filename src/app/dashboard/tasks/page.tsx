@@ -70,7 +70,11 @@ export default function TasksPage() {
     })
   }
 
-  const tasks = data?.tasks || []
+  const tasks = (data?.tasks || []).map((task: { id: string; title: string; description: string | null; status: "iniciado" | "pendente" | "finalizado"; createdAt: string | Date; updatedAt: string | Date }) => ({
+    ...task,
+    createdAt: new Date(task.createdAt),
+    updatedAt: new Date(task.updatedAt),
+  })) as Task[]
 
   return (
     <RequireAuth>
@@ -97,7 +101,7 @@ export default function TasksPage() {
                   {tasks.length === 0 ? (
                     <CardEmpty />
                   ) : (
-                    tasks.map((task: Task) => (
+                    tasks.map((task) => (
                       <TaskCard
                         key={task.id}
                         task={task}

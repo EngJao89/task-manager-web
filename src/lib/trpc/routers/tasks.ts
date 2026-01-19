@@ -78,47 +78,63 @@ export const tasksRouter = router({
   update: protectedProcedure
     .input(updateTaskSchema)
     .mutation(async ({ input, ctx }) => {
-      if (!ctx.session) {
-        throw new Error("Não autenticado")
-      }
+      try {
+        if (!ctx.session) {
+          throw new Error("Não autenticado")
+        }
 
-      const existingTask = await ctx.db
-        .select()
-        .from(tasks)
-        .where(
-          and(
-            eq(tasks.id, input.id),
-            eq(tasks.userId, ctx.session.user.id)
+        const existingTask = await ctx.db
+          .select()
+          .from(tasks)
+          .where(
+            and(
+              eq(tasks.id, input.id),
+              eq(tasks.userId, ctx.session.user.id)
+            )
           )
-        )
-        .limit(1)
+          .limit(1)
 
-      if (existingTask.length === 0) {
-        throw new Error("Task não encontrada")
-      }
+        if (existingTask.length === 0) {
+          throw new Error("Task não encontrada")
+        }
 
-      const updateData: {
-        title?: string
-        description?: string
-        status?: "iniciado" | "pendente" | "finalizado"
-        updatedAt: Date
-      } = {
-        updatedAt: new Date(),
-      }
+        const updateData: {
+          title?: string
+          description?: string | null
+          status?: "iniciado" | "pendente" | "finalizado"
+          updatedAt: Date
+        } = {
+          updatedAt: new Date(),
+        }
 
-      if (input.title) updateData.title = input.title
-      if (input.description !== undefined) updateData.description = input.description
-      if (input.status) updateData.status = input.status
+        if (input.title) updateData.title = input.title
+        if (input.description !== undefined) {
+          updateData.description = input.description && input.description.trim() !== "" 
+            ? input.description 
+            : null
+        }
+        if (input.status) updateData.status = input.status
 
-      const updatedTask = await ctx.db
-        .update(tasks)
-        .set(updateData)
-        .where(eq(tasks.id, input.id))
-        .returning()
+        const updatedTask = await ctx.db
+          .update(tasks)
+          .set(updateData)
+          .where(eq(tasks.id, input.id))
+          .returning()
 
-      return {
-        success: true,
-        task: updatedTask[0],
+        if (!updatedTask[0]) {
+          throw new Error("Erro ao atualizar task")
+        }
+
+        return {
+          success: true,
+          task: updatedTask[0],
+        }
+      } catch (error) {
+        console.error("Update task error:", error)
+        if (error instanceof Error) {
+          throw error
+        }
+        throw new Error("Erro desconhecido ao atualizar task")
       }
     }),
 
