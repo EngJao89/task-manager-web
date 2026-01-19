@@ -2,6 +2,7 @@
 
 import { RequireAuth } from "@/components/auth/require-auth"
 import { Sidebar } from "@/components/sidebar"
+import { UsersEmpty } from "@/components/UsersEmpty"
 
 export default function UsersPage() {
   return (
@@ -13,15 +14,11 @@ export default function UsersPage() {
             <div className="mb-8">
               <h1 className="text-4xl font-bold text-zinc-100">Usuários</h1>
               <p className="mt-2 text-zinc-400">
-                Gerencie os usuários do sistema
+                Visualização de usuários do sistema
               </p>
             </div>
 
-            <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-6">
-              <p className="text-zinc-400">
-                Listagem de usuários em breve...
-              </p>
-            </div>
+            <UsersEmpty />
           </div>
         </main>
       </div>
