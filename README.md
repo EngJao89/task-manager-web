@@ -238,3 +238,11 @@ Este é um projeto de gerenciamento de tarefas dinamico, criado com Next.js, Sha
   - Variantes de componentes usando `class-variance-authority` (CVA)
   - Responsividade mobile-first com breakpoints do Tailwind
   - Suporte a dark mode através da paleta zinc (preparado para futura expansão)
+
+## Observações
+- O projeto está em ambiente de desenvolvimento, portanto, não está em produção.(É um ponto para futuras melhorias e implementações com a qual estou estudando.)
+- Futuramente, será implementado um modal para atalho de visualização de tarefas.
+- Futuramente, será implementado um sistema de notificações.
+- Futuramente, será implementado um sistema de tags para categorização de tarefas.
+- Futuramente, será implementado um sistema de prioridades para tarefas.
+- Futuramente, será implementado um sistema de gerenciamento de projetos.
