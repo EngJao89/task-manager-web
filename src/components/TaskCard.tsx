@@ -2,9 +2,9 @@
 
 import { CheckCircle2, Circle, Clock, Trash2, Edit2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import type { TaskCardProps } from "@/types/tasks"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import type { TaskCardProps } from "@/types/tasks"
 
 const statusConfig = {
   pendente: {
@@ -38,16 +38,32 @@ export function TaskCard({
   isUpdatingStatus = false,
   isDeleting = false,
   showActions = true,
-}: TaskCardProps) {
+  onCardClick,
+}: Readonly<TaskCardProps>) {
   const statusInfo = statusConfig[task.status]
   const StatusIcon = statusInfo.icon
+  const isClickable = Boolean(onCardClick)
 
   return (
     <Card
       className={cn(
         "border-zinc-700 bg-zinc-900",
-        statusInfo.borderColor
+        statusInfo.borderColor,
+        isClickable && "cursor-pointer transition-opacity hover:opacity-90"
       )}
+      onClick={isClickable ? () => onCardClick?.(task) : undefined}
+      role={isClickable ? "button" : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      onKeyDown={
+        isClickable
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onCardClick?.(task)
+              }
+            }
+          : undefined
+      }
     >
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
@@ -62,6 +78,7 @@ export function TaskCard({
                   const newStatus = e.target.value as "iniciado" | "pendente" | "finalizado"
                   onStatusChange(task.id, newStatus)
                 }}
+                onClick={(e) => isClickable && e.stopPropagation()}
                 disabled={isUpdatingStatus}
                 className={cn(
                   "text-sm font-medium bg-zinc-800/50 border border-zinc-700 rounded-md px-3 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:border-zinc-600 transition-all",
@@ -100,7 +117,10 @@ export function TaskCard({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onEdit(task)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEdit(task)
+                }}
                 className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
               >
                 <Edit2 className="h-4 w-4" />
@@ -108,7 +128,10 @@ export function TaskCard({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onDelete(task.id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(task.id)
+                }}
                 className="text-zinc-400 hover:text-red-400 hover:bg-zinc-800"
                 disabled={isDeleting}
               >
