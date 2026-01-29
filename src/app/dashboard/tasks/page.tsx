@@ -70,8 +70,9 @@ export default function TasksPage() {
     })
   }
 
-  const tasks = (data?.tasks || []).map((task: { id: string; title: string; description: string | null; status: "iniciado" | "pendente" | "finalizado"; createdAt: string | Date; updatedAt: string | Date }) => ({
+  const tasks = (data?.tasks || []).map((task: { id: string; title: string; description: string | null; status: "iniciado" | "pendente" | "finalizado"; expiresAt?: string | Date | null; createdAt: string | Date; updatedAt: string | Date }) => ({
     ...task,
+    expiresAt: task.expiresAt ? new Date(task.expiresAt) : null,
     createdAt: new Date(task.createdAt),
     updatedAt: new Date(task.updatedAt),
   })) as Task[]

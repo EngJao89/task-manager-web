@@ -10,6 +10,7 @@ const createTaskSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
   description: z.string().optional(),
   status: taskStatusEnum.default("pendente"),
+  expiresAt: z.coerce.date().optional().nullable(),
 })
 
 const updateTaskSchema = z.object({
@@ -17,6 +18,7 @@ const updateTaskSchema = z.object({
   title: z.string().min(1, "Título é obrigatório").optional(),
   description: z.string().optional(),
   status: taskStatusEnum.optional(),
+  expiresAt: z.coerce.date().optional().nullable(),
 })
 
 export const tasksRouter = router({
@@ -37,6 +39,7 @@ export const tasksRouter = router({
             description: input.description && input.description.trim() !== "" ? input.description : null,
             status: input.status || "pendente",
             userId: ctx.session.user.id,
+            expiresAt: input.expiresAt ?? null,
             createdAt: now,
             updatedAt: now,
           })
@@ -102,6 +105,7 @@ export const tasksRouter = router({
           title?: string
           description?: string | null
           status?: "iniciado" | "pendente" | "finalizado"
+          expiresAt?: Date | null
           updatedAt: Date
         } = {
           updatedAt: new Date(),
@@ -109,11 +113,12 @@ export const tasksRouter = router({
 
         if (input.title) updateData.title = input.title
         if (input.description !== undefined) {
-          updateData.description = input.description && input.description.trim() !== "" 
-            ? input.description 
+          updateData.description = input.description && input.description.trim() !== ""
+            ? input.description
             : null
         }
         if (input.status) updateData.status = input.status
+        if (input.expiresAt !== undefined) updateData.expiresAt = input.expiresAt
 
         const updatedTask = await ctx.db
           .update(tasks)

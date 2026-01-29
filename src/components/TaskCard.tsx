@@ -107,10 +107,14 @@ export function TaskCard({
             )}
             <p className="text-xs text-zinc-500">
               Criada em:{" "}
-              {new Date(task.createdAt).toLocaleDateString(
-                "pt-BR"
-              )}
+              {new Date(task.createdAt).toLocaleDateString("pt-BR")}
             </p>
+            {task.expiresAt && (
+              <p className="text-xs text-zinc-500 mt-1">
+                Expira em:{" "}
+                {new Date(task.expiresAt).toLocaleDateString("pt-BR")}
+              </p>
+            )}
           </div>
           {showActions && (
             <div className="flex gap-2 ml-4">

@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle2, Circle, Clock, Calendar, FileText } from "lucide-react"
+import { CheckCircle2, Circle, Clock, CalendarDays, FileText } from "lucide-react"
 
 import type { TaskDetailDialogProps } from "@/types/tasks"
 import {
@@ -95,7 +95,7 @@ export function TaskDetailDialog({
           )}
 
           <div className="flex gap-2">
-            <Calendar className="h-4 w-4 text-zinc-500 shrink-0 mt-0.5" />
+            <CalendarDays className="h-4 w-4 text-zinc-500 shrink-0 mt-0.5" />
             <div className="space-y-1">
               <p className="text-sm font-medium text-zinc-400">Criada em</p>
               <p className="text-zinc-300 text-sm">
@@ -107,6 +107,16 @@ export function TaskDetailDialog({
               <p className="text-zinc-300 text-sm">
                 {formatDate(task.updatedAt)}
               </p>
+              {task.expiresAt && (
+                <>
+                  <p className="text-sm font-medium text-zinc-400 mt-2">
+                    Data final (expiração)
+                  </p>
+                  <p className="text-zinc-300 text-sm">
+                    {formatDate(task.expiresAt)}
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
