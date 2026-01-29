@@ -3,6 +3,7 @@ export type Task = {
   title: string
   description: string | null
   status: "iniciado" | "pendente" | "finalizado"
+  expiresAt: Date | null
   createdAt: Date
   updatedAt: Date
 }
@@ -11,6 +12,7 @@ export type TaskFormData = {
   title: string
   description?: string
   status: "iniciado" | "pendente" | "finalizado"
+  expiresAt?: Date | null
 }
 
 export interface TaskFormProps {

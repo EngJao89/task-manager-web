@@ -4,6 +4,8 @@ import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "react-toastify"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 import * as z from "zod"
 
 import type { TaskFormData, TaskFormProps } from "@/types/tasks"
@@ -13,6 +15,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Card,
   CardContent,
@@ -20,11 +28,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { CalendarIcon } from "lucide-react"
 
 const taskSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
   description: z.string().optional(),
   status: z.enum(["iniciado", "pendente", "finalizado"]),
+  expiresAt: z.date().optional().nullable(),
 })
 
 function useCurrentUserId() {
@@ -49,12 +59,14 @@ export function TaskForm({
         title: editingTask.title,
         description: editingTask.description || "",
         status: editingTask.status,
+        expiresAt: editingTask.expiresAt ?? null,
       }
     }
     return {
       title: "",
       description: "",
       status: "pendente" as const,
+      expiresAt: null as Date | null,
     }
   }, [editingTask])
 
@@ -62,11 +74,15 @@ export function TaskForm({
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues,
   })
+
+  const expiresAt = watch("expiresAt")
 
   const createMutation = trpc.tasks.create.useMutation({
     onSuccess: () => {
@@ -74,6 +90,7 @@ export function TaskForm({
         title: "",
         description: "",
         status: "pendente",
+        expiresAt: null,
       })
       toast.success("Task criada com sucesso!")
       onSuccess()
@@ -90,6 +107,7 @@ export function TaskForm({
         title: "",
         description: "",
         status: "pendente",
+        expiresAt: null,
       })
       toast.success("Task atualizada com sucesso!")
       onSuccess()
@@ -106,8 +124,9 @@ export function TaskForm({
         title: editingTask.title,
         description: editingTask.description || "",
         status: editingTask.status,
+        expiresAt: editingTask.expiresAt ?? null,
       }, { keepDefaultValues: false })
-      
+
       if (globalThis.window !== undefined) {
         setTimeout(() => {
           const formElement = document.getElementById("task-form")
@@ -119,6 +138,7 @@ export function TaskForm({
         title: "",
         description: "",
         status: "pendente",
+        expiresAt: null,
       }, { keepDefaultValues: false })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,6 +160,7 @@ export function TaskForm({
       title: "",
       description: "",
       status: "pendente",
+      expiresAt: null,
     })
     onCancel()
   }
@@ -206,6 +227,46 @@ export function TaskForm({
                 <option value="iniciado">Iniciado</option>
                 <option value="finalizado">Finalizado</option>
               </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-zinc-200">Data final (expiração)</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal bg-zinc-800 border-zinc-700 text-zinc-100 hover:bg-zinc-700 hover:text-zinc-100"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {expiresAt
+                      ? format(expiresAt, "PPP", { locale: ptBR })
+                      : "Selecionar data"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 border-zinc-700 bg-zinc-900" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={expiresAt ?? undefined}
+                    onSelect={(date) => setValue("expiresAt", date ?? null)}
+                    locale={ptBR}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                  />
+                  {expiresAt && (
+                    <div className="p-2 border-t border-zinc-700">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-zinc-400 hover:text-zinc-100"
+                        onClick={() => setValue("expiresAt", null)}
+                      >
+                        Limpar data
+                      </Button>
+                    </div>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="flex gap-2">

@@ -30,8 +30,9 @@ export default function DashboardPage() {
   const { data } = trpc.auth.getCurrentUser.useQuery()
   const { data: tasksData } = trpc.tasks.list.useQuery()
 
-  const recentTasks = (tasksData?.tasks?.slice(0, 3) || []).map((task: { id: string; title: string; description: string | null; status: "iniciado" | "pendente" | "finalizado"; createdAt: string | Date; updatedAt: string | Date }) => ({
+  const recentTasks = (tasksData?.tasks?.slice(0, 3) || []).map((task: { id: string; title: string; description: string | null; status: "iniciado" | "pendente" | "finalizado"; expiresAt?: string | Date | null; createdAt: string | Date; updatedAt: string | Date }) => ({
     ...task,
+    expiresAt: task.expiresAt ? new Date(task.expiresAt) : null,
     createdAt: new Date(task.createdAt),
     updatedAt: new Date(task.updatedAt),
   })) as Task[]

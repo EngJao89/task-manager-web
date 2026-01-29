@@ -53,6 +53,12 @@ try {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
   `)
+  // Adiciona coluna expires_at se não existir (migração)
+  try {
+    sqlite.exec(`ALTER TABLE tasks ADD COLUMN expires_at INTEGER`)
+  } catch {
+    // Coluna já existe
+  }
 } catch (error) {
   console.error("Error initializing database:", error)
 }
