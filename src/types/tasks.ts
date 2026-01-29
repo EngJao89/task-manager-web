@@ -27,4 +27,11 @@ export interface TaskCardProps {
   readonly isUpdatingStatus?: boolean
   readonly isDeleting?: boolean
   readonly showActions?: boolean
+  readonly onCardClick?: (task: Task) => void
+}
+
+export interface TaskDetailDialogProps {
+  readonly task: Task | null
+  readonly open: boolean
+  readonly onOpenChange: (open: boolean) => void
 }

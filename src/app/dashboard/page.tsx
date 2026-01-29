@@ -1,17 +1,18 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
 import { trpc } from "@/lib/trpc/client"
 import type { Task } from "@/types/tasks"
 import { RequireAuth } from "@/components/auth/require-auth"
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card"
 import { Sidebar } from "@/components/sidebar"
 import { AccountInfo } from "@/components/AccountInfo"
@@ -19,9 +20,13 @@ import { TaskInfo } from "@/components/TaskInfo"
 import { StaticsInfo } from "@/components/StaticsInfo"
 import { CardEmpty } from "@/components/CardEmpty"
 import { TaskCard } from "@/components/TaskCard"
+import { TaskDetailDialog } from "@/components/TaskDetailDialog"
 import { Button } from "@/components/ui/button"
 
 export default function DashboardPage() {
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [detailOpen, setDetailOpen] = useState(false)
+
   const { data } = trpc.auth.getCurrentUser.useQuery()
   const { data: tasksData } = trpc.tasks.list.useQuery()
 
@@ -30,6 +35,11 @@ export default function DashboardPage() {
     createdAt: new Date(task.createdAt),
     updatedAt: new Date(task.updatedAt),
   })) as Task[]
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task)
+    setDetailOpen(true)
+  }
 
   return (
     <RequireAuth>
@@ -87,6 +97,7 @@ export default function DashboardPage() {
                           onDelete={() => {}}
                           onStatusChange={() => {}}
                           showActions={false}
+                          onCardClick={handleTaskClick}
                         />
                       ))}
                     </div>
@@ -101,6 +112,12 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
+
+      <TaskDetailDialog
+        task={selectedTask}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
     </RequireAuth>
   )
 }
