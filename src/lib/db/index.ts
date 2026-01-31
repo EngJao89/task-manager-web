@@ -59,6 +59,17 @@ try {
   } catch {
     // Coluna já existe
   }
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      task_id TEXT NOT NULL,
+      task_title TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `)
 } catch (error) {
   console.error("Error initializing database:", error)
 }
