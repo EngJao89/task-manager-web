@@ -14,6 +14,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import { trpc } from "@/lib/trpc/client"
 import { Button } from "@/components/ui/button"
+import { NotificationsDropdown } from "@/components/NotificationsDropdown"
 
 const navigation = [
   {
@@ -55,8 +56,9 @@ export function Sidebar() {
 
   return (
     <div className="flex h-screen w-64 flex-col border-r border-zinc-700 bg-zinc-900">
-      <div className="flex h-16 items-center border-b border-zinc-700 px-6">
+      <div className="flex h-16 items-center justify-between border-b border-zinc-700 px-4">
         <h1 className="text-xl font-bold text-zinc-100">Task Manager</h1>
+        <NotificationsDropdown />
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">

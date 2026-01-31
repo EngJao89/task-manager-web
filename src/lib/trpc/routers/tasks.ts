@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { router, protectedProcedure } from "../init"
-import { tasks } from "@/lib/db/schema"
-import { eq, and, desc } from "drizzle-orm"
+import { tasks, notifications } from "@/lib/db/schema"
+import { eq, and, desc, gte, lte, ne, isNotNull } from "drizzle-orm"
 import { nanoid } from "nanoid"
 
 const taskStatusEnum = z.enum(["iniciado", "pendente", "finalizado"])
@@ -48,6 +48,15 @@ export const tasksRouter = router({
         if (!newTask[0]) {
           throw new Error("Erro ao criar task")
         }
+
+        await ctx.db.insert(notifications).values({
+          id: nanoid(),
+          userId: ctx.session.user.id,
+          type: "created",
+          taskId: newTask[0].id,
+          taskTitle: newTask[0].title,
+          createdAt: now,
+        })
 
         return {
           success: true,
@@ -130,6 +139,15 @@ export const tasksRouter = router({
           throw new Error("Erro ao atualizar task")
         }
 
+        await ctx.db.insert(notifications).values({
+          id: nanoid(),
+          userId: ctx.session.user.id,
+          type: "edited",
+          taskId: updatedTask[0].id,
+          taskTitle: updatedTask[0].title,
+          createdAt: new Date(),
+        })
+
         return {
           success: true,
           task: updatedTask[0],
@@ -190,5 +208,31 @@ export const tasksRouter = router({
     }
 
     return stats
+  }),
+
+  getExpiringSoon: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.session) {
+      throw new Error("Não autenticado")
+    }
+
+    const now = new Date()
+    const inSevenDays = new Date(now)
+    inSevenDays.setDate(inSevenDays.getDate() + 7)
+
+    const expiringTasks = await ctx.db
+      .select()
+      .from(tasks)
+      .where(
+        and(
+          eq(tasks.userId, ctx.session.user.id),
+          isNotNull(tasks.expiresAt),
+          gte(tasks.expiresAt, now),
+          lte(tasks.expiresAt, inSevenDays),
+          ne(tasks.status, "finalizado")
+        )
+      )
+      .orderBy(tasks.expiresAt)
+
+    return { tasks: expiringTasks }
   }),
 })
