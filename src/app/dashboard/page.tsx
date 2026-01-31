@@ -15,12 +15,12 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Sidebar } from "@/components/sidebar"
-import { AccountInfo } from "@/components/AccountInfo"
-import { TaskInfo } from "@/components/TaskInfo"
-import { StaticsInfo } from "@/components/StaticsInfo"
-import { CardEmpty } from "@/components/CardEmpty"
-import { TaskCard } from "@/components/TaskCard"
-import { TaskDetailDialog } from "@/components/TaskDetailDialog"
+import { AccountInfo } from "@/components/account-info"
+import { TaskInfo } from "@/components/task-info"
+import { StaticsInfo } from "@/components/statics-info"
+import { CardEmpty } from "@/components/card-empty"
+import { TaskCard } from "@/components/task-card"
+import { TaskDetailDialog } from "@/components/task-detail-dialog"
 import { Button } from "@/components/ui/button"
 
 export default function DashboardPage() {

@@ -14,7 +14,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import { trpc } from "@/lib/trpc/client"
 import { Button } from "@/components/ui/button"
-import { NotificationsDropdown } from "@/components/NotificationsDropdown"
+import { NotificationsDropdown } from "@/components/notifications-dropdown"
 
 const navigation = [
   {

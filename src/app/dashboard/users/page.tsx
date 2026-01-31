@@ -3,8 +3,8 @@
 import { trpc } from "@/lib/trpc/client"
 import { RequireAuth } from "@/components/auth/require-auth"
 import { Sidebar } from "@/components/sidebar"
-import { UsersEmpty } from "@/components/UsersEmpty"
-import { UserCard } from "@/components/UserCard"
+import { UsersEmpty } from "@/components/users-empty"
+import { UserCard } from "@/components/user-card"
 
 export default function UsersPage() {
   const { data: users, isLoading } = trpc.auth.list.useQuery()
