@@ -7,10 +7,10 @@ import type { Task } from "@/types/tasks"
 import { trpc } from "@/lib/trpc/client"
 import { RequireAuth } from "@/components/auth/require-auth"
 import { Sidebar } from "@/components/sidebar"
-import { TaskForm } from "@/components/TaskForm"
-import { TaskCard } from "@/components/TaskCard"
-import { Alert } from "@/components/Alert"
-import { CardEmpty } from "@/components/CardEmpty"
+import { TaskForm } from "@/components/task-form"
+import { TaskCard } from "@/components/task-card"
+import { Alert } from "@/components/alert"
+import { CardEmpty } from "@/components/card-empty"
 
 export default function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null)

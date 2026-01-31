@@ -25,7 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { StaticsInfoEmpty } from "@/components/StaticsInfoEmpty"
+import { StaticsInfoEmpty } from "@/components/statics-info-empty"
 
 export function StaticsInfo() {
   const { data: stats } = trpc.tasks.getStats.useQuery()
